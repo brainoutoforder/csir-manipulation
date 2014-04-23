@@ -1,0 +1,87 @@
+<launch>
+
+  <!-- hand descriptions -->
+  <rosparam command="load" file="$(find wam_object_manipulation_launch)/config/bhand_description.yaml"/>
+
+  <!-- arm configurations -->
+  <!-- Not using this configuration file to simplify things. The PR2 version specifies
+  2 point trajectories for three configurations - front, above, side -->
+  <!--
+  <rosparam command="load" file="$()/config/wam_arm_configuration.yaml"/>
+  -->
+
+  <!-- hand posture controller -->
+  <include file="$(find bhand_grasp_controller)/launch/bhand_grasp_posture_action.launch"/>
+
+  <!--object manipulator launch-prefix="xterm -e gdb -tui -args">-->
+  <node name="object_manipulator" pkg="object_manipulator"
+    type="object_manipulator_node" respawn="false" output="screen">
+      <!-- left only, but what should happen with unused topics -->
+
+      <remap from="arm/constraint_aware_ik" to="/csir_wam_arm_kinematics/get_constraint_aware_ik"/>
+      <remap from="right_arm/constraint_aware_ik" to="/csir_wam_arm_kinematics/get_constraint_aware_ik"/>
+
+      <remap from="arm/get_fk" to="/csir_wam_arm_kinematics/get_fk"/>
+      <remap from="right_arm/get_fk" to="/csir_wam_arm_kinematics/get_fk"/>
+
+      <remap from="arm/interpolated_ik" to="/interpolated_ik_motion_plan"/>
+      <remap from="right_arm/interpolated_ik" to="/r_interpolated_ik_motion_plan"/>
+
+      <remap from="arm/interpolated_ik_set_params" to="/interpolated_ik_motion_plan_set_params"/>
+      <remap from="right_arm/interpolated_ik_set_params" to="/r_interpolated_ik_motion_plan_set_params"/>
+
+      <remap from="arm/get_ik_solver_info" to="/csir_wam_arm_kinematics/get_ik_solver_info"/>
+      <remap from="right_arm/get_ik_solver_info" to="/csir_wam_arm_kinematics/get_ik_solver_info"/>
+
+      <remap from="arm/get_state_validity" to="/environment_server/get_state_validity"/>    
+      <remap from="right_arm/get_state_validity" to="/environment_server/get_state_validity"/>    
+
+      <remap from="arm/move_arm" to="/move_arm"/>
+
+      <!--
+      <remap from="left_arm/joint_trajectory" to="/l_arm_controller/joint_trajectory_action"/>
+      <remap from="right_arm/joint_trajectory" to="/r_arm_controller/joint_trajectory_action"/>
+      -->
+
+      <remap from="arm/hand_posture_execution" to="/bhand_grasp_posture_controller"/>
+
+      <remap from="arm/grasp_status" to="/bhand_grasp_status"/>
+
+      <!-- This node does not do anything except return a positive response so 
+      this node does not halt before moving the arm. -->
+      <remap from="switch_controller" to="/wam_switch_controller"/>
+      <remap from="list_controllers" to="/wam_list_controllers"/>
+ 
+      <param name="arm_joint_controller" value="wam_joint_controller"/>
+      <param name="arm_cartesian_controller" value="wam_cart_controller"/>
+
+      <param name="default_cluster_planner" value="/wam_cluster_planner"/>
+      <param name="default_database_planner" value="/database_grasp_planning"/>
+      <param name="use_probabilistic_grasp_planner" value="false"/>
+      <param name="randomize_grasps" value="false"/>
+ 
+      <!-- Use generic kinematics plugin -->
+      <param name="kinematics_plugin_name" value="arm_kinematics_constraint_aware/KDLArmKinematicsPlugin"/>
+
+  </node>
+
+  <!-- This node does not do anything except satisfy ROS API requirements for
+  the object_manipulator node. -->
+  <node name="wam_controller_manager" pkg="wam_controllers"
+  type="wam_controller_manager.py" output="screen"/>
+  <node name="wam_joint_controller" pkg="wam_controllers" type="wam_joint_controller.py" output="screen"/>
+
+  <!-- cluster bounding box finder -->
+  <node name="cluster_bounding_box_finder" pkg="object_manipulator" cwd="node"
+      type="cluster_bounding_box_finder_server.py" output="screen" respawn="false">
+    <param name="z_up_frame" value="/base_link"/>
+  </node>
+
+  <!-- pad objects when filtering from collision map -->
+  <rosparam param="/robot_description_planning/default_object_padding">0.0001</rosparam>
+
+  <!-- Extremely simple grasp planner for segmented clusters -->
+  <node name="wam_cluster_planner_node" pkg="wam_grasp_segmented_cluster_planner"
+      type="segmented_cluster_planner.py" output="screen"/>
+
+</launch>

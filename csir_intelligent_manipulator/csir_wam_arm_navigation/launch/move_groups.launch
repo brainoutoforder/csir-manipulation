@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find csir_wam_arm_navigation)/launch/move_arm.launch" />
+    <include file="$(find csir_wam_arm_navigation)/launch/move_hand.launch" />
+</launch>

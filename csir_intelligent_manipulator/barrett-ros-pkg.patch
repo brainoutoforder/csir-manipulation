@@ -1,0 +1,282 @@
+diff -ruN barrett-ros-pkg/wam_common/wam_srvs/manifest.xml /home/jkizito/fuerte_workspace/barrett-ros-pkg/wam_common/wam_srvs/manifest.xml
+--- barrett-ros-pkg/wam_common/wam_srvs/manifest.xml	2014-03-28 13:43:33.216447631 +0200
++++ barrett-ros-pkg/wam_common/wam_srvs/manifest.xml	2014-03-06 11:58:56.032292095 +0200
+@@ -8,5 +8,6 @@
+   <license>BSD</license>
+   <url>http://ros.org/wiki/wam_srvs</url>
+   <depend package="geometry_msgs"/>
++  <depend package="trajectory_msgs"/>
+ </package>
+ 
+diff -ruN barrett-ros-pkg/wam_common/wam_srvs/srv/JointTrajectoryMove.srv /home/jkizito/fuerte_workspace/barrett-ros-pkg/wam_common/wam_srvs/srv/JointTrajectoryMove.srv
+--- barrett-ros-pkg/wam_common/wam_srvs/srv/JointTrajectoryMove.srv	1970-01-01 02:00:00.000000000 +0200
++++ barrett-ros-pkg/wam_common/wam_srvs/srv/JointTrajectoryMove.srv	2014-03-06 11:59:55.036293501 +0200
+@@ -0,0 +1,3 @@
++trajectory_msgs/JointTrajectory trajectory
++---
++bool success
+diff -ruN barrett-ros-pkg/wam_common/wam_teleop/src/wam_joystick_teleop.cpp /home/jkizito/fuerte_workspace/barrett-ros-pkg/wam_common/wam_teleop/src/wam_joystick_teleop.cpp
+--- barrett-ros-pkg/wam_common/wam_teleop/src/wam_joystick_teleop.cpp	2014-03-28 13:43:33.788447644 +0200
++++ barrett-ros-pkg/wam_common/wam_teleop/src/wam_joystick_teleop.cpp	2013-02-13 16:18:30.826567487 +0200
+@@ -6,7 +6,7 @@
+ #include "std_srvs/Empty.h"
+ 
+ #include "wam_msgs/RTCartVel.h"
+-#include "wam_msgs/RTOrtnVel.h"
++#include "wam_msgs/RTJointVel.h"
+ #include "wam_srvs/GravityComp.h"
+ #include "wam_srvs/Hold.h"
+ #include "wam_srvs/BHandGraspVel.h"
+@@ -58,7 +58,7 @@
+ 
+   //Messages
+   wam_msgs::RTCartVel cart_vel;
+-  wam_msgs::RTOrtnVel ortn_vel;
++  wam_msgs::RTJointVel ortn_vel;
+ 
+   //Publishers
+   ros::Publisher cart_vel_pub, ortn_vel_pub;
+@@ -81,15 +81,15 @@
+ void WamTeleop::init()
+ {
+   // We will check the parameter server for WAM Teleoperation configuration variables
+-  n_.param("deadman_button", deadman_btn, 10);
++  n_.param("deadman_button", deadman_btn, 5);
+   n_.param("guardian_deadman_button", guardian_deadman_btn, 11); 
+-  n_.param("gripper_open_button", gpr_open_btn, 12);
+-  n_.param("gripper_close_button", gpr_close_btn, 14);
+-  n_.param("spread_open_button", sprd_open_btn, 13);
+-  n_.param("spread_close_button", sprd_close_btn, 15);
+-  n_.param("orientation_control_button", ortn_btn, 8);
+-  n_.param("go_home_button", home_btn, 0);
+-  n_.param("hold_joints_button", hold_btn, 3);
++  n_.param("gripper_open_button", gpr_open_btn, 3);
++  n_.param("gripper_close_button", gpr_close_btn, 1);
++  n_.param("spread_open_button", sprd_open_btn, 0);
++  n_.param("spread_close_button", sprd_close_btn, 2);
++  n_.param("orientation_control_button", ortn_btn, 7);
++  n_.param("go_home_button", home_btn, 9);
++  n_.param("hold_joints_button", hold_btn, 8);
+   n_.param("grasp_max_velocity", max_grsp_vel, 1.0);
+   n_.param("spread_max_velocity", max_sprd_vel, 1.0);
+   n_.param("cartesian_magnitude", cart_mag, 0.05);
+@@ -97,8 +97,8 @@
+   n_.param("cartesian_x_axis", axis_x, 3);
+   n_.param("cartesian_y_axis", axis_y, 2);
+   n_.param("cartesian_x_axis", axis_z, 1);
+-  n_.param("orientation_roll_axis", axis_r, 3);
+-  n_.param("orientation_pitch_axis", axis_p, 2);
++  n_.param("orientation_roll_axis", axis_r, 2);
++  n_.param("orientation_pitch_axis", axis_p, 3);
+   n_.param("orientation_yaw_axis", axis_yaw, 1);
+ 
+   hold.request.hold = false; // Default Start for joint hold command is false
+@@ -116,7 +116,7 @@
+ 
+   //Publishers
+   cart_vel_pub = nw_.advertise<wam_msgs::RTCartVel>("cart_vel_cmd", 1);         // /wam/cart_vel_cmd
+-  ortn_vel_pub = nw_.advertise<wam_msgs::RTOrtnVel>("ortn_vel_cmd", 1);         // /wam/ortn_vel_cmd
++  ortn_vel_pub = nw_.advertise<wam_msgs::RTJointVel>("jnt_vel_cmd", 1);         // /wam/joint_vel_cmd
+ }
+ 
+ void WamTeleop::joyCallback(const sensor_msgs::Joy::ConstPtr& joy_msg)
+@@ -272,10 +272,10 @@
+   //Check our published orientation velocity state and act accordingly
+   if(ortn_publish && !cart_publish && !grsp_publish && !sprd_publish && !home_publish && !hold_publish) // if only cart_publish state is set
+   {
+-     ortn_vel.angular[0] = req_rdir;
+-     ortn_vel.angular[1] = req_pdir;
+-     ortn_vel.angular[2] = req_yawdir;
+-     ortn_vel.magnitude = ortn_mag;
++     ortn_vel.velocities.resize(7);
++     ortn_vel.velocities[4] = req_rdir;
++     ortn_vel.velocities[5] = req_pdir;
++     ortn_vel.velocities[6] = req_yawdir;
+      ortn_vel_pub.publish(ortn_vel);
+   }
+ }
+diff -ruN barrett-ros-pkg/wam_robot/wam_node/src/wam_node.cpp /home/jkizito/fuerte_workspace/barrett-ros-pkg/wam_robot/wam_node/src/wam_node.cpp
+--- barrett-ros-pkg/wam_robot/wam_node/src/wam_node.cpp	2014-03-28 13:43:33.176447632 +0200
++++ barrett-ros-pkg/wam_robot/wam_node/src/wam_node.cpp	2014-03-27 15:41:25.275176874 +0200
+@@ -31,6 +31,8 @@
+ 
+ #include <boost/thread.hpp> // BarrettHand threading
+ #include <boost/bind.hpp>
++#include <boost/tuple/tuple.hpp>
++#include <boost/shared_ptr.hpp>
+ 
+ #include "ros/ros.h"
+ #include "tf/transform_datatypes.h"
+@@ -44,6 +46,7 @@
+ #include "wam_srvs/GravityComp.h"
+ #include "wam_srvs/Hold.h"
+ #include "wam_srvs/JointMove.h"
++#include "wam_srvs/JointTrajectoryMove.h"
+ #include "wam_srvs/PoseMove.h"
+ #include "wam_srvs/CartPosMove.h"
+ #include "wam_srvs/OrtnMove.h"
+@@ -65,6 +68,8 @@
+ #include <barrett/systems/wam.h>
+ #include <barrett/detail/stl_utils.h>
+ 
++
++static const int CONTROL_FREQ = 500; // Default Control Loop / Publishing Frequency
+ static const int PUBLISH_FREQ = 250; // Default Control Loop / Publishing Frequency
+ static const int BHAND_PUBLISH_FREQ = 5; // Publishing Frequency for the BarretHand
+ static const double SPEED = 0.03; // Default Cartesian Velocity
+@@ -156,6 +161,7 @@
+   {
+     BARRETT_UNITS_TEMPLATE_TYPEDEFS(DOF);
+   protected:
++    typedef boost::tuple<double, jp_type> jp_traj_type;
+     bool cart_vel_status, ortn_vel_status, jnt_vel_status;
+     bool jnt_pos_status, cart_pos_status, ortn_pos_status, new_rt_cmd;
+     double cart_vel_mag, ortn_vel_mag;
+@@ -178,6 +184,7 @@
+     systems::Summer<cp_type> cart_pos_sum;
+     systems::Summer<math::Vector<3>::type> ortn_cmd_sum;
+     systems::Ramp ramp;
++    systems::Ramp traj_ramp;
+     systems::RateLimiter<jp_type> jp_rl;
+     systems::RateLimiter<cp_type> cp_rl;
+     Multiplier<double, cp_type, cp_type> mult_linear;
+@@ -209,16 +216,21 @@
+ 
+     //Services
+     ros::ServiceServer gravity_srv, go_home_srv, hold_jpos_srv, hold_cpos_srv;
+-    ros::ServiceServer hold_ortn_srv, joint_move_srv, pose_move_srv;
++    ros::ServiceServer hold_ortn_srv, joint_move_srv, pose_move_srv, joint_traj_move_srv;
+     ros::ServiceServer cart_move_srv, ortn_move_srv, hand_close_srv;
+     ros::ServiceServer hand_open_grsp_srv, hand_close_grsp_srv, hand_open_sprd_srv;
+     ros::ServiceServer hand_close_sprd_srv, hand_fngr_pos_srv, hand_fngr_vel_srv;
+     ros::ServiceServer hand_grsp_pos_srv, hand_grsp_vel_srv, hand_sprd_pos_srv;
+     ros::ServiceServer hand_sprd_vel_srv;
+ 
++    // Trajectory pointers
++    boost::shared_ptr<systems::Callback<double, jp_type> > traj_ptr_;
++    boost::shared_ptr<math::Spline<jp_type> > traj_spline_ptr_;
++    boost::shared_ptr<std::vector<jp_traj_type> > traj_vec_ptr_;
++
+   public:
+     WamNode(systems::Wam<DOF>& wam_) :
+-        wam(wam_), hand(NULL), ramp(NULL, SPEED)
++        wam(wam_), hand(NULL), ramp(NULL, SPEED), traj_ramp(NULL, 1.0)
+     {
+     }
+     void
+@@ -241,6 +253,8 @@
+     bool
+     jointMove(wam_srvs::JointMove::Request &req, wam_srvs::JointMove::Response &res);
+     bool
++    jointTrajectoryMove(wam_srvs::JointTrajectoryMove::Request &req, wam_srvs::JointTrajectoryMove::Response &res);
++    bool
+     poseMove(wam_srvs::PoseMove::Request &req, wam_srvs::PoseMove::Response &res);
+     bool
+     cartMove(wam_srvs::CartPosMove::Request &req, wam_srvs::CartPosMove::Response &res);
+@@ -299,6 +313,7 @@
+     cart_vel_mag = SPEED; //Setting default cartesian velocity magnitude to SPEED
+     ortn_vel_mag = SPEED;
+     pm.getExecutionManager()->startManaging(ramp); //starting ramp manager
++    pm.getExecutionManager()->startManaging(traj_ramp); //starting traj_ramp manager
+ 
+     ROS_INFO(" \n %zu-DOF WAM", DOF);
+     jp_home = wam.getJointPositions();
+@@ -373,6 +388,7 @@
+     hold_cpos_srv = n_.advertiseService("hold_cart_pos", &WamNode::holdCPos, this); // wam/hold_cart_pos
+     hold_ortn_srv = n_.advertiseService("hold_ortn", &WamNode::holdOrtn, this); // wam/hold_ortn
+     joint_move_srv = n_.advertiseService("joint_move", &WamNode::jointMove, this); // wam/joint_move
++    joint_traj_move_srv = n_.advertiseService("joint_traj_move", &WamNode::jointTrajectoryMove, this); // wam/joint_traj_move
+     pose_move_srv = n_.advertiseService("pose_move", &WamNode::poseMove, this); // wam/pose_move
+     cart_move_srv = n_.advertiseService("cart_move", &WamNode::cartMove, this); // wam/cart_pos_move
+     ortn_move_srv = n_.advertiseService("ortn_move", &WamNode::ortnMove, this); // wam/ortn_move
+@@ -467,6 +483,82 @@
+     return true;
+   }
+ 
++template<size_t DOF>
++  bool WamNode<DOF>::jointTrajectoryMove(wam_srvs::JointTrajectoryMove::Request &req, wam_srvs::JointTrajectoryMove::Response &res)
++  {
++    wam.idle();
++    traj_ramp.stop();
++
++    size_t num_points = req.trajectory.points.size();
++    if (num_points == 0)
++    {
++      ROS_INFO("Request failed: no points in trajectory msg");
++      res.success = false;
++    }
++
++    // get joint pos
++    //std::vector<jp_traj_type> traj_vec;
++    traj_vec_ptr_.reset(new std::vector<jp_traj_type>);
++    for (size_t i = 0; i < num_points; i++)
++    {
++      jp_type jp_req;
++      jp_req[0] = req.trajectory.points[i].positions[0];
++      jp_req[1] = req.trajectory.points[i].positions[1];
++      jp_req[2] = req.trajectory.points[i].positions[2];
++      jp_req[3] = req.trajectory.points[i].positions[3];
++      jp_req[4] = req.trajectory.points[i].positions[4];
++      jp_req[5] = req.trajectory.points[i].positions[5];
++      jp_req[6] = req.trajectory.points[i].positions[6];
++
++      double time_ms = std::floor(static_cast<double>(req.trajectory.points[i].time_from_start.nsec) * 1.0e-6 + 0.5);
++      time_ms = (static_cast<int>(std::floor(time_ms)) % 2 == 0) ? time_ms : time_ms + 1.0;
++      double time = time_ms / 1000.0; 
++      time += static_cast<double>(req.trajectory.points[i].time_from_start.sec);
++      // ROS_INFO_STREAM("time: " << time);
++      // if time step less than control period discard oldest entry
++      double time_prev = 0;
++      //if (!traj_vec.empty()) 
++      if (!traj_vec_ptr_->empty()) 
++      {
++        //time_prev = boost::tuples::get<0>(traj_vec.back());
++        time_prev = boost::tuples::get<0>(traj_vec_ptr_->back());
++        if ((time - time_prev) < (1.0 / static_cast<double>(CONTROL_FREQ)))
++        {
++          //traj_vec.pop_back();
++          traj_vec_ptr_->pop_back();
++        }
++      }
++      jp_traj_type point(time, jp_req);
++      //traj_vec.push_back(point);
++      traj_vec_ptr_->push_back(point);
++    }
++
++    //math::Spline<jp_type> traj_spline(traj_vec);
++    //traj_spline_ptr_.reset(new math::Spline<jp_type>(traj_vec));
++    traj_spline_ptr_.reset(new math::Spline<jp_type>(*traj_vec_ptr_));
++
++    wam.moveTo(traj_spline_ptr_->eval(traj_spline_ptr_->initialS()));
++
++    traj_ramp.setOutput(traj_spline_ptr_->initialS());
++
++    //systems::Callback<double, jp_type> trajectory(boost::ref(traj_spline));
++    traj_ptr_.reset(new systems::Callback<double, jp_type>(boost::ref(*traj_spline_ptr_)));
++    //connect(traj_ramp.output, trajectory.input);
++    systems::forceConnect(traj_ramp.output, traj_ptr_->input);/*! @todo use systems::forceConnect?*/
++    wam.trackReferenceSignal(traj_ptr_->output);
++
++    traj_ramp.start();
++
++    //while (trajectory.input.getValue() < traj_spline.finalS())
++      //usleep(1000000);
++
++    //wam.idle();
++    //traj_ramp.stop();
++
++    res.success = true;
++    return true;
++  }
++
+ //Function to command a pose move to the WAM
+ template<size_t DOF>
+   bool WamNode<DOF>::poseMove(wam_srvs::PoseMove::Request &req, wam_srvs::PoseMove::Response &res)
+@@ -567,6 +659,7 @@
+   {
+     ROS_INFO("Moving BarrettHand Grasp: %.3f radians", req.radians);
+     hand->trapezoidalMove(Hand::jp_type(req.radians), Hand::GRASP, false);
++    //hand->waitUntilDoneMoving();
+     return true;
+   }
+ 

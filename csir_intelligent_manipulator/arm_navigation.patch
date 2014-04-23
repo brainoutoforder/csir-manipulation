@@ -1,0 +1,12 @@
+diff -ruN arm_navigation/arm_kinematics_constraint_aware/src/arm_kinematics_constraint_aware.cpp /home/jkizito/fuerte_workspace/arm_navigation/arm_kinematics_constraint_aware/src/arm_kinematics_constraint_aware.cpp
+--- arm_navigation/arm_kinematics_constraint_aware/src/arm_kinematics_constraint_aware.cpp	2014-04-01 11:28:04.550021598 +0200
++++ arm_navigation/arm_kinematics_constraint_aware/src/arm_kinematics_constraint_aware.cpp	2014-01-30 15:07:12.073766990 +0200
+@@ -284,7 +284,7 @@
+     response.error_code.val = response.error_code.SUCCESS;
+   }
+   delete state;
+-  return ik_valid;
++  return true;
+ }
+ 
+ bool ArmKinematicsConstraintAware::getIKSolverInfo(kinematics_msgs::GetKinematicSolverInfo::Request &request, 

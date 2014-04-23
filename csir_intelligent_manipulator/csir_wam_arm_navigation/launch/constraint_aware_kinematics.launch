@@ -1,0 +1,10 @@
+<launch>
+    <include file="$(find csir_wam_arm_navigation)/launch/csir_wam_planning_environment.launch" />
+    <node pkg="arm_kinematics_constraint_aware" type="arm_kinematics_constraint_aware"
+    name="csir_wam_arm_kinematics">
+        <param name="group" type="string" value="arm" />
+        <param name="arm/root_name" type="string" value="base_link" />
+        <param name="arm/tip_name" type="string" value="bhand_ftsensor" />
+        <param name="kinematics_solver" type="string" value="arm_kinematics_constraint_aware/KDLArmKinematicsPlugin" />
+    </node>
+</launch>

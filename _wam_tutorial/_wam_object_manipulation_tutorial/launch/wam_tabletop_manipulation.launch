@@ -1,0 +1,35 @@
+<launch>
+
+  <!-- Only one arm used, left by default -->
+  <arg name="flatten_table" default="false"/>
+  <arg name="kinect_camera_name" default="wam_base_kinect"/>
+
+  <!-- database server running on local machine -->
+  <rosparam command="load" file="$(find wam_object_manipulation_tutorial)/config/db_server.yaml"/>
+  <node pkg="household_objects_database" name="objects_database_node" type=
+      "objects_database_node" respawn="true" output="screen"/>
+
+  <!-- manipulation prerequisites -->
+  <include file="$(find wam_object_manipulation_tutorial)/launch/wam_manipulation_prerequisites.launch">
+    <arg name="kinect_camera_name" value="$(arg kinect_camera_name)"/>
+  </include>
+
+  <!-- manipulation -->
+  <include file="$(find wam_object_manipulation_tutorial)/launch/wam_manipulation.launch"/>
+
+  <!-- tabletop collision map processing -->
+  <node pkg="tabletop_collision_map_processing" name="tabletop_collision_map_processing" 
+      type="tabletop_collision_map_processing_node" respawn="false" output="screen">
+    <param name="get_model_mesh_srv" value="/objects_database_node/get_model_mesh"/>
+    <param name="static_map_cloud_name" value="full_cloud_filtered"/>
+    <param name="table_thickness" value="0.01"/>
+  </node>
+
+  <!-- tabletop segmentation and object recognition -->
+  <!-- Use custom launch file to disable transform from /optical_frame to /base_link -->
+  <include file="$(find wam_tabletop_manipulation_launch)/launch/tabletop_complete.launch">
+    <arg name="tabletop_segmentation_points_input" value="$(arg kinect_camera_name)/depth_registered/points"/>
+    <arg name="flatten_table" value="$(arg flatten_table)"/>
+  </include>
+
+</launch>

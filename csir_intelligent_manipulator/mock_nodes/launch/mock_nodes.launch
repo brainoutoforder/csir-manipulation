@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="mock_nodes" type="mock_wam.py" name="mock_wam" output="screen"/>
+  <node pkg="mock_nodes" type="mock_bhand.py" name="mock_bhand" output="screen"/>
+</launch>

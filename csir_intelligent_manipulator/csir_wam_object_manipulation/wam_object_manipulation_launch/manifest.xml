@@ -1,0 +1,17 @@
+<package>
+  <description brief="wam_object_manipulation_launch">
+
+     wam_object_manipulation_launch
+
+  </description>
+  <author>jkizito</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/wam_object_manipulation_launch</url>
+  <depend package="dynamic_reconfigure"/>
+  <depend package="csir_wam_arm_navigation"/>
+  <depend package="object_manipulator"/>
+
+</package>
+
+

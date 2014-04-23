@@ -1,0 +1,24 @@
+<package>
+  <description brief="bhand_grasp_controller">
+
+     bhand_grasp_controller
+
+  </description>
+  <author>jkizito</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/bhand_grasp_controller</url>
+  <depend package="actionlib"/>
+  <depend package="object_manipulation_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="wam_srvs"/>
+  <depend package="rostest"/>
+  <depend package="rosunit"/>
+
+  <export>
+    <rosdoc config="config/rosdoc.yaml"/>
+  </export>
+
+</package>
+

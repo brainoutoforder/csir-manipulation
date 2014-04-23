@@ -1,0 +1,20 @@
+<launch>
+
+  <!-- Use Python version of node by default -->
+  <arg name="use_python" default="true"/>
+
+  <node unless="$(arg use_python)" pkg="bhand_grasp_controller" name="bhand_grasp_posture_controller" type="bhand_grasp_controller" respawn="true" output="screen">
+    <remap from="gripper_action_name" to="/bhand_controller/bhand_action" />
+    <remap from="posture_action_name" to="/bhand_grasp_posture_controller" />
+    <remap from="grasp_query_name" to="/bhand_grasp_status" />
+    <param name="bhand_object_presence_threshold" value="-.01" />
+  </node> 
+
+  <node if="$(arg use_python)" pkg="bhand_grasp_controller" name="bhand_grasp_posture_controller" type="bhand_grasp_controller.py" respawn="true" output="screen">
+    <remap from="gripper_action_name" to="/bhand_controller/bhand_action" />
+    <remap from="posture_action_name" to="/bhand_grasp_posture_controller" />
+    <remap from="grasp_query_name" to="/bhand_grasp_status" />
+    <param name="bhand_object_presence_threshold" value="-.01" />
+  </node> 
+
+</launch>

@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="mock_nodes" type="mock_joints.py" name="mock_joints"/>
+</launch>

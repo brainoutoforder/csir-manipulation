@@ -1,0 +1,16 @@
+<package>
+  <description brief="csir_wam_description">
+
+     csir_wam_description
+
+  </description>
+  <author>mias-jk1</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/csir_wam_description</url>
+  <depend package="urdf"/>
+  <depend package="xacro"/>
+
+</package>
+
+

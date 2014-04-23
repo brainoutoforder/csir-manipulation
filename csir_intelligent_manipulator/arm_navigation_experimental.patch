@@ -1,0 +1,24 @@
+diff -ruN arm_navigation_experimental/interpolated_ik_motion_planner/scripts/interpolated_ik_motion_planner.py /home/jkizito/fuerte_workspace/sandbox/arm_navigation_experimental/interpolated_ik_motion_planner/scripts/interpolated_ik_motion_planner.py
+--- arm_navigation_experimental/interpolated_ik_motion_planner/scripts/interpolated_ik_motion_planner.py	2014-03-28 12:48:03.300376595 +0200
++++ arm_navigation_experimental/interpolated_ik_motion_planner/scripts/interpolated_ik_motion_planner.py	2014-01-29 12:12:22.644703190 +0200
+@@ -351,7 +351,7 @@
+ if __name__ == "__main__":
+ 
+     which_arm = None
+-    if len(sys.argv) >= 2:
++    if len(sys.argv) >= 4: #Changed from 2 because this was causing the program name to be used if no arguments used for program
+         which_arm = sys.argv[1]
+     interpolated_ik_service = InterpolatedIKService(which_arm)
+     rospy.loginfo("Ready to serve interpolated IK motion plan requests.")
+diff -ruN arm_navigation_experimental/interpolated_ik_motion_planner/src/interpolated_ik_motion_planner/ik_utilities.py /home/jkizito/fuerte_workspace/sandbox/arm_navigation_experimental/interpolated_ik_motion_planner/src/interpolated_ik_motion_planner/ik_utilities.py
+--- arm_navigation_experimental/interpolated_ik_motion_planner/src/interpolated_ik_motion_planner/ik_utilities.py	2014-03-28 12:47:04.776375347 +0200
++++ arm_navigation_experimental/interpolated_ik_motion_planner/src/interpolated_ik_motion_planner/ik_utilities.py	2014-01-31 15:14:00.234283719 +0200
+@@ -243,6 +243,8 @@
+     #ordered_collision_operations is a list of collision operations to feed to IK to modify the collision space
+     def run_ik(self, pose_stamped, start_angles, link_name, collision_aware = 1, ordered_collision_operations = None, IK_robot_state = None, link_padding = None):
+ 
++#pdb.set_trace() #DEBUG
++
+         if link_name not in self.link_names:
+             rospy.logerr("link name %s not possible!"%link_name)
+             return None

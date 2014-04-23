@@ -1,0 +1,23 @@
+<package>
+  <description brief="wam_grasp_segmented_cluster_planner">
+
+     wam_grasp_segmented_cluster_planner
+
+  </description>
+  <author>jkizito</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/wam_grasp_segmented_cluster_planner</url>
+  <depend package="object_manipulation_msgs"/>
+  <depend package="rospy"/>
+  <depend package="pcl"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf"/>
+  <depend package="visualization_msgs"/>
+  <depend package="object_manipulator"/>
+  <depend package="rostest"/>
+  <depend package="rosunit"/>
+
+</package>
+
+
