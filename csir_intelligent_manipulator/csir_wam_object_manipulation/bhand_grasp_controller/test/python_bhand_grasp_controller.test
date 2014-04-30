@@ -1,5 +1,0 @@
-<launch>
-  <node name="bhand_grasp_controller" pkg="bhand_grasp_controller" type="bhand_grasp_controller.py" output="screen"/>
-  <test test-name="ntest_bhand_grasp_controller" pkg="bhand_grasp_controller" type="ntest_bhand_grasp_controller.py"/>
-</launch>
-

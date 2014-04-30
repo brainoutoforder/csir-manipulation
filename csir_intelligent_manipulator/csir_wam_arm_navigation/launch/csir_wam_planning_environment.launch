@@ -1,4 +1,0 @@
-<launch>
-    <param name="robot_description" textfile="$(find csir_wam_description)/urdf/csir_wam.urdf" />
-    <rosparam command="load" ns="robot_description_planning" file="$(find csir_wam_arm_navigation)/config/csir_wam_planning_description.yaml" />
-</launch>

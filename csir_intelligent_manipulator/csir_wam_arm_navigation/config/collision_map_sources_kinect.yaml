@@ -1,5 +1,0 @@
-cloud_sources:
-  - name: /wam_base_kinect/rgb/points_filtered # filtered by robot_self_filter
-    frame_subsample: 1
-    point_subsample: 1
-    sensor_frame: /wam_base_kinect_rgb_optical_frame # as named in urdf

@@ -1,8 +1,0 @@
-- builder: sphinx
-  name: Python Documentation
-  output_dir: python
-  sphinx_root_dir: doc/source
-- builder: doxygen
-  name: C++ Documentation
-  output_dir: C++
-  file_patterns: '*.c *.cpp *.h *.cc *.hh *.dox'

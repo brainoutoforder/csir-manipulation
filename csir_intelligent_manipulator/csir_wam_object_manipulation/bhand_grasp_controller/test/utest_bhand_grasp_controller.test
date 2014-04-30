@@ -1,3 +1,0 @@
-<launch>
-  <test test-name="utest_bhand_grasp_controller" pkg="bhand_grasp_controller" type="utest_bhand_grasp_controller"/>
-</launch>
