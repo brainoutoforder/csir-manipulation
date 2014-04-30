@@ -1,0 +1,8 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: csir_wam_description
+    relative_path: urdf/csir_wam.urdf
+  SRDF:
+    relative_path: config/csir_wam.srdf
+  CONFIG:
+    generated_timestamp: 1398864891
