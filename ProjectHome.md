@@ -1,0 +1,1 @@
+Repository containing software and ROS packages for robotic manipulation, primarily for the Barrett WAM and Hand.
